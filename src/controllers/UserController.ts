@@ -9,20 +9,20 @@ class UserController{
     async registerUser(req,res){
         try {
             const {username,email, password} = req.body;
-            console.log(req.body);
-            const findUserEmail = await User.findOne({where: {email}});
+            const findUserEmail: [] = await User.findOne({where: {email}});
 
             if (!findUserEmail){
-                let hashPassword = bcrypt.hashSync(password,16);
-                let user = await User.create({ username,email, password: hashPassword});
-                res.json({info: {
+                let hashPassword: boolean = bcrypt.hashSync(password);
+                let user: any = await User.create({ username,email, password: hashPassword});
+                res.json({
+                    info: {
                         username: user.username,
                         email: user.email,
-                    }});
+                    }
+                });
             }else {
                 res.json({error: 'There is such a user'});
             }
-
         }catch (e) {
             res.json({error: e.message});
         }
@@ -32,22 +32,25 @@ class UserController{
     async loginUser(req,res){
         try {
             const {email, password} = req.body;
+            const findUser: any = await User.findOne({where:{email}});
 
-            const findUser = await User.findOne({where:{email}});
             if (findUser) {
-                let comparePassword = bcrypt.compare(password, findUser.password);
+                let comparePassword: boolean = bcrypt.compare(password, findUser.password);
 
                 if (comparePassword){
-                    let payload = {
+                    let payload: object = {
                         id: findUser.id,
                         email: findUser.email,
                     };
 
-                    let token = jwt.sign(payload,process.env.SECRET_KEY,{expiresIn: '10h'});
-                    res.json({token,user: {
+                    let token: string = jwt.sign(payload,process.env.SECRET_KEY,{expiresIn: '10h'});
+                    res.json({
+                        token,
+                        user: {
                             username: findUser.username,
                             email: findUser.email
-                        }});
+                        }
+                    });
                 }else {
                     res.json({error: 'wrong password'})
                 }
@@ -65,18 +68,22 @@ class UserController{
     async editUSer(req,res){
         try{
             const {username,email,password} = req.body;
-            const hashPassword = bcrypt.hashSync(password);
+            const hashPassword: boolean = bcrypt.hashSync(password);
 
             await User.update({
                 username,
                 email,
                 password: hashPassword,
-            }, {where: {id: req.auth.id}}).then(data=>{
-                console.log(data);
-                res.json({data:{
+            }, {
+                where: {id: req.auth.id}
+            }
+            ).then(data=>{
+                res.json({
+                    data:{
                         username: data.username,
                         email: data.email
-                    }})
+                    }
+                })
             });
 
         } catch (e) {
@@ -87,7 +94,7 @@ class UserController{
     async getUsersList(req,res){
         try {
             await User.findAll().then(data=>{
-                res.json(data)
+                res.json({data})
             })
         }catch (e) {
             res.json({error: e.message});
