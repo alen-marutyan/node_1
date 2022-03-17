@@ -1,15 +1,15 @@
-
+const db = require("../models/index")
 const bcrypt = require('bcryptjs');
 // @ts-ignore
-const {User} = require('../models/model')
-// @ts-ignore
 const jwt = require('jsonwebtoken')
+const User = db['User']
 
 class UserController{
     async registerUser(req,res){
+        console.log(req.body)
         try {
             const {username,email, password} = req.body;
-            const findUserEmail: [] = await User.findOne({where: {email}});
+            const findUserEmail: [] = await User.findOne({where: {email:email}});
 
             if (!findUserEmail){
                 let hashPassword: boolean = bcrypt.hashSync(password);
@@ -71,8 +71,8 @@ class UserController{
             const hashPassword: boolean = bcrypt.hashSync(password);
 
             await User.update({
-                username,
-                email,
+                username: username,
+                email: email,
                 password: hashPassword,
             }, {
                 where: {id: req.auth.id}
