@@ -6,7 +6,6 @@ const User = db['User']
 
 class UserController{
     async registerUser(req,res){
-        console.log(req.body)
         try {
             const {username,email, password} = req.body;
             const findUserEmail: [] = await User.findOne({where: {email:email}});
