@@ -3,7 +3,8 @@ let express = require('express')
 // @ts-ignore
 const router = express.Router();
 const {loginUser, registerUser, editUSer,getUsersList} = require('../controllers/UserController')
-const auth = require('../middleware/auth');
+// @ts-ignore
+let auth = require('../middleware/auth');
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
