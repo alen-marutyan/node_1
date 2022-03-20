@@ -4,10 +4,10 @@ class CarController{
     async createCar(req,res){
 
         try {
-            let create_model_car = await model.create({name: req.body.model_car});
-            let create_brand_name_car = await brand_name.create({name: req.body.brand_name_car});
+            let create_model_car:any = await model.create({name: req.body.model_car});
+            let create_brand_name_car:any = await brand_name.create({name: req.body.brand_name_car});
 
-            let create = await Car.create({
+            let create:any = await Car.create({
                 license_plate: req.body.license_plate,
                 model_car: create_model_car.id,
                 brand_name_car: create_brand_name_car.id,
@@ -30,16 +30,16 @@ class CarController{
 
     async editCar(req,res){
         try {
-            let update_car_plate = await Car.update(
+            let update_car_plate:{} = await Car.update(
                 {license_plate: req.body.license_plate},
                 {where: {id: req.params.id}}
             )
 
-            let create_model_car = await model.update(
+            let create_model_car:{} = await model.update(
                 {name: req.body.model_car},
                 {where: {id: req.params.id}}
             );
-            let create_brand_name_car = await brand_name.update(
+            let create_brand_name_car:{} = await brand_name.update(
                 {name: req.body.brand_name_car},
                 {where: {id: req.params.id}}
             );
@@ -64,8 +64,6 @@ class CarController{
                     id: req.params.id
                 }
             }).then(data=>{
-                console.log(data.model_car)
-                console.log(data.brand_name_car)
                 model.destroy({where:{id: data.model_car}});
                 brand_name.destroy({where:{id: data.brand_name_car}});
                 Car.destroy({where: {id: req.params.id}})
@@ -88,7 +86,7 @@ class CarController{
                     model: model, as: 'model'
                 }]
             }).then(data=>{
-                let arr = [];
+                let arr:any = [];
 
                 data.forEach(el=>{
                     arr.push({
