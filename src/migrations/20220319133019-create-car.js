@@ -16,13 +16,16 @@ module.exports = {
       model_car: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        primaryKey: true
       },
       brand_name_car: {
         type: Sequelize.INTEGER,
+        primaryKey: true,
         allowNull: false,
       },
       userId: {
         type: Sequelize.INTEGER,
+        primaryKey: true,
         allowNull: false,
       },
       createdAt: {
