@@ -12,6 +12,15 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      country:{
+        type: Sequelize.STRING,
+      },
+      author:{
+        type: Sequelize.STRING,
+      },
+      year: {
+        type: Sequelize.INTEGER
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

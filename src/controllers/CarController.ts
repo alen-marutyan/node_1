@@ -4,14 +4,23 @@ class CarController{
     async createCar(req,res){
 
         try {
-            let create_model_car:any = await model.create({name: req.body.model_car});
-            let create_brand_name_car:any = await brand_name.create({name: req.body.brand_name_car});
+
+            let findCar = await Car.findOne({where: {license_plate: req.body.license_plate}});
+            if (findCar) return res.json({error: 'have this license_plate'});
+
+            let create_model_car:any = await model.create({name: req.body.model_car, year: req.body.model_year});
+            let create_brand_name_car:any = await brand_name.create({
+                name: req.body.brand_name_car,
+                author: req.body.brand_author,
+                country: req.body.brand_country,
+                year: req.body.brand_year
+            });
 
             let create:any = await Car.create({
                 license_plate: req.body.license_plate,
                 model_car: create_model_car.id,
                 brand_name_car: create_brand_name_car.id,
-                userId: req.auth.id
+                userId: req.auth.id,
             });
 
             res.json({
@@ -36,11 +45,19 @@ class CarController{
             )
 
             let create_model_car:{} = await model.update(
-                {name: req.body.model_car},
+                {
+                    name: req.body.model_car,
+                    year: req.body.model_year
+                },
                 {where: {id: req.params.id}}
             );
             let create_brand_name_car:{} = await brand_name.update(
-                {name: req.body.brand_name_car},
+                {
+                    name: req.body.brand_name_car,
+                    country: req.body.brand_country,
+                    author: req.body.brand_author,
+                    year: req.body.brand_year
+                },
                 {where: {id: req.params.id}}
             );
 
@@ -92,7 +109,11 @@ class CarController{
                     arr.push({
                         license_plate: el.license_plate,
                         model_car: el.model.name,
-                        brand_name_car: el.brand_name.name
+                        model_year: el.model.year,
+                        brand_name_car: el.brand_name.name,
+                        brand_country: el.brand_name.country,
+                        brand_author: el.brand_name.author,
+                        brand_year: el.brand_name.year,
                     })
                 })
                 res.json({data: arr})
