@@ -1,25 +1,26 @@
 module.exports = function (sequelize, DataTypes) {
-  const Car = sequelize.define('Car',{
-    car_id:{
+  const Brand = sequelize.define('Brand',{
+    brand_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    license_plate: {
+    name:{
       type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
+      allowNull: false
     },
   },{
     timestamps: false,
   });
 
-  Car.associate = function (models) {
-    Car.belongsTo(models.User, {foreignKey: 'user_id', onDelete: 'cascade' });
+  Brand.associate = function (models) {
+    Brand.belongsTo(models.Model, {foreignKey: 'model_id', onDelete: 'cascade' });
   }
-
 
   sequelize.sync({alter: true})
 
-  return Car;
+  return Brand;
 }
+
+
+

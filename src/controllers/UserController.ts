@@ -1,16 +1,14 @@
-const db = require("../models/index")
+const {User} = require("../models/index")
 const bcrypt = require('bcryptjs');
-// @ts-ignore
-const jwt = require('jsonwebtoken')
-const User = db['User']
+const jsonwebtoken = require('jsonwebtoken')
 
 class UserController{
     async registerUser(req,res){
         try {
             const {username,email, password} = req.body;
             const findUserEmail: [] = await User.findOne({where: {email:email}});
+            if (findUserEmail) res.json({error: 'There is such a user'});
 
-            if (!findUserEmail){
                 let hashPassword: boolean = bcrypt.hashSync(password);
                 let user: any = await User.create({ username,email, password: hashPassword});
                 res.json({
@@ -19,9 +17,7 @@ class UserController{
                         email: user.email,
                     }
                 });
-            }else {
-                res.json({error: 'There is such a user'});
-            }
+
         }catch (e) {
             res.json({error: e.message});
         }
@@ -32,17 +28,18 @@ class UserController{
         try {
             const {email, password} = req.body;
             const findUser: any = await User.findOne({where:{email}});
+            if (!findUser) res.json({error: 'There is such a user'});
 
-            if (findUser) {
-                let comparePassword: boolean = bcrypt.compare(password, findUser.password);
+            let comparePassword: boolean = bcrypt.compare(password, findUser.password);
+            if (!comparePassword) res.json({error: 'wrong password'});
 
-                if (comparePassword){
                     let payload: object = {
-                        id: findUser.id,
+                        user_id: findUser.user_id,
                         email: findUser.email,
                     };
 
-                    let token: string = jwt.sign(payload,process.env.SECRET_KEY,{expiresIn: '10h'});
+                    let token: string = jsonwebtoken.sign(payload,process.env.SECRET_KEY,{expiresIn: '10h'});
+                    console.log(findUser.user_id)
                     res.json({
                         token,
                         user: {
@@ -50,13 +47,7 @@ class UserController{
                             email: findUser.email
                         }
                     });
-                }else {
-                    res.json({error: 'wrong password'})
-                }
 
-            }else {
-                res.json({error: 'wrong email'});
-            }
 
         }catch (e) {
             res.json({error: e.message});
