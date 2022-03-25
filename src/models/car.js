@@ -16,10 +16,11 @@ module.exports = function (sequelize, DataTypes) {
 
   Car.associate = function (models) {
     Car.belongsTo(models.User, {foreignKey: 'user_id', onDelete: 'cascade' });
+    Car.hasOne(models.Model,{foreignKey: 'model_id', onDelete: 'cascade'})
   }
 
 
-  sequelize.sync({alter: true})
+  sequelize.sync({alter: true, force: true})
 
   return Car;
 }

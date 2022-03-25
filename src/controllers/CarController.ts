@@ -50,7 +50,7 @@ class CarController{
                     },
                     {
                         where: {
-                            id: data.model_id
+                            model_id: data.model_id
                         }
                     }
                 );
@@ -82,16 +82,34 @@ class CarController{
 
     async listCar(req,res){
         try {
+
+
             await Car.findAll({
-                where:{
-                    user_id: req.auth.user_id
+                    where: {
+                        user_id: req.auth.user_id
+                    },
+                    include: [{
+                        model: Model,
+                        include: [{
+                            model: Brand
+                        }]
+                    }]
                 },
-                include: [{
-                    model: 'User', as: "email"
-                }]
-            }).then(data=>{
-                res.json({data})
-            })
+
+            ).then(data=>{
+                let arr:any = [];
+
+                data.forEach(el=>{
+                    arr.push({
+                        license_plate: el.license_plate,
+                        model: el.Model.name,
+                        brand: el.Model.Brand.name
+                    })
+                });
+
+                res.json({data: arr});
+           });
+
 
         }catch (e) {
             res.json({error: e.message});

@@ -14,10 +14,10 @@ module.exports = function (sequelize, DataTypes) {
   });
 
   Brand.associate = function (models) {
-    Brand.belongsTo(models.Model, {foreignKey: 'model_id', onDelete: 'cascade' });
+    Brand.belongsTo(models.Model,{foreignKey: 'model_id', onDelete: 'cascade'} );
   }
 
-  sequelize.sync({alter: true})
+  sequelize.sync({alter: true, force: true})
 
   return Brand;
 }

@@ -65,7 +65,7 @@ class UserController{
                 email: email,
                 password: hashPassword,
             }, {
-                where: {id: req.auth.id}
+                where: {user_id: req.auth.user_id}
             }
             ).then(data=>{
                 res.json({

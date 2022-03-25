@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Car,{foreignKey: 'user_id', onDelete: 'cascade'});
   }
 
-  sequelize.sync({alter: true})
+  sequelize.sync({alter: true, force: true})
   return User;
 };
 
