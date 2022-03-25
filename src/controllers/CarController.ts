@@ -1,36 +1,23 @@
-const {Car,model,brand_name} = require('../models')
+const {Car, Brand, Model} = require("../models/index")
 
 class CarController{
     async createCar(req,res){
 
-        try {
-
+        try{
             let findCar = await Car.findOne({where: {license_plate: req.body.license_plate}});
             if (findCar) return res.json({error: 'have this license_plate'});
 
-            let create_model_car:any = await model.create({name: req.body.model_car, year: req.body.model_year});
-            let create_brand_name_car:any = await brand_name.create({
-                name: req.body.brand_name_car,
-                author: req.body.brand_author,
-                country: req.body.brand_country,
-                year: req.body.brand_year
-            });
-
-            let create:any = await Car.create({
-                license_plate: req.body.license_plate,
-                model_car: create_model_car.id,
-                brand_name_car: create_brand_name_car.id,
-                userId: req.auth.id,
-            });
+            let createCar = await Car.create({license_plate: req.body.license_plate, user_id: req.auth.user_id});
+            let createModel:any = await Model.create({name: req.body.model, car_id: createCar.car_id});
+            let createBrand:any = await Brand.create({name: req.body.brand, model_id: createModel.model_id});
 
             res.json({
                 data: {
-                    license_plate: create.license_plate,
-                    model_car: create_model_car.name,
-                    brand_name_car: create_brand_name_car.name,
+                    license_plate: createCar.license_plate,
+                    model: createModel.name,
+                    brand: createBrand.name,
                 }
             });
-
         }catch (e) {
             res.json({error: e.message});
         }
@@ -39,29 +26,39 @@ class CarController{
 
     async editCar(req,res){
         try {
-            let update_car_plate:{} = await Car.update(
+
+            let updateCar:{} = await Car.update(
                 {license_plate: req.body.license_plate},
-                {where: {id: req.params.id}}
-            )
-
-            let create_model_car:{} = await model.update(
-                {
-                    name: req.body.model_car,
-                    year: req.body.model_year
-                },
-                {where: {id: req.params.id}}
-            );
-            let create_brand_name_car:{} = await brand_name.update(
-                {
-                    name: req.body.brand_name_car,
-                    country: req.body.brand_country,
-                    author: req.body.brand_author,
-                    year: req.body.brand_year
-                },
-                {where: {id: req.params.id}}
+                {where: {car_id: req.params.id}}
             );
 
-            Promise.all([update_car_plate, create_model_car, create_brand_name_car]).then(()=>{
+            let updateModel:{} = await Model.update(
+                {
+                    name: req.body.model,
+                },
+                {
+                    where: {
+                        car_id: req.params.id
+                    }
+                }
+            );
+
+            let updateBrand = await Model.findOne({where: {car_id: req.params.id}}).then(data=>{
+                Brand.update(
+                    {
+                        name: req.body.brand,
+                    },
+                    {
+                        where: {
+                            model_id: data.model_id
+                        }
+                    }
+                );
+            }).catch(err=>{
+                res.json({error: err.message})
+            });
+
+            Promise.all([updateCar, updateModel, updateBrand]).then(()=>{
                 res.json({data: 'updated!'});
             }).catch(e=>{
                 res.json({error: e.message});
@@ -74,18 +71,10 @@ class CarController{
     }
 
     async removeCar(req,res){
-        try {
 
-            await Car.findOne({
-                where:{
-                    id: req.params.id
-                }
-            }).then(data=>{
-                model.destroy({where:{id: data.model_car}});
-                brand_name.destroy({where:{id: data.brand_name_car}});
-                Car.destroy({where: {id: req.params.id}})
-                res.json({data: 'removed!'})
-            })
+        try {
+            await Car.destroy({where:{car_id:req.params.id}});
+            res.send('removed!')
         }catch (e) {
             res.json({error: e.message});
         }
@@ -93,31 +82,34 @@ class CarController{
 
     async listCar(req,res){
         try {
+
+
             await Car.findAll({
-                where:{
-                    userId: req.auth.id
+                    where: {
+                        user_id: req.auth.user_id
+                    },
+                    include: [{
+                        model: Model,
+                        include: [{
+                            model: Brand
+                        }]
+                    }]
                 },
-                include: [{
-                    model: brand_name, as: "brand_name",
-                },{
-                    model: model, as: 'model'
-                }]
-            }).then(data=>{
+
+            ).then(data=>{
                 let arr:any = [];
 
                 data.forEach(el=>{
                     arr.push({
                         license_plate: el.license_plate,
-                        model_car: el.model.name,
-                        model_year: el.model.year,
-                        brand_name_car: el.brand_name.name,
-                        brand_country: el.brand_name.country,
-                        brand_author: el.brand_name.author,
-                        brand_year: el.brand_name.year,
+                        model: el.Model.name,
+                        brand: el.Model.Brand.name
                     })
-                })
-                res.json({data: arr})
-            })
+                });
+
+                res.json({data: arr});
+           });
+
 
         }catch (e) {
             res.json({error: e.message});
